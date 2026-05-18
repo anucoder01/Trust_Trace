@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TrustTrace – AI Signature Forgery Detection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+<nav id="navbar">
+  <div class="nav-inner">
+    <div class="logo"><span class="logo-icon">⬡</span> TrustTrace</div>
+    <ul class="nav-links">
+      <li><a href="#risk">Risk Engine</a></li>
+      <li><a href="#tremor">Tremor AI</a></li>
+      <li><a href="#stylus">Stylus Track</a></li>
+      <li><a href="#adaptive">Adaptive</a></li>
+      <li><a href="#teller">Teller View</a></li>
+    </ul>
+    <a href="#teller" class="nav-cta">⚡ Teller Dashboard</a>
+    <button class="nav-burger" id="burger">&#9776;</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <canvas id="heroCanvas"></canvas>
+  <div class="hero-content">
+    <div class="badge-pill"><span class="badge-dot"></span> 5 AI Modules · Computer Vision · Temporal Analysis · Adaptive Learning</div>
+    <h1>Next-Gen Forgery<br/><span class="gradient-text">Intelligence Platform</span></h1>
+    <p class="hero-sub">TrustTrace combines Computer Vision, LSTM temporal analysis, multimodal risk scoring, and few-shot continual learning to stop signature fraud before it happens.</p>
+    <div class="hero-actions">
+      <a href="#risk" class="btn-primary">Explore Features <span class="btn-arrow">→</span></a>
+      <a href="#teller" class="btn-ghost">Open Teller Dashboard</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><span class="stat-num" data-target="99.4">0</span><span>%</span><p>Detection Accuracy</p></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><span class="stat-num" data-target="5">0</span><span></span><p>AI Modules</p></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><span class="stat-num" data-target="120">0</span><span>ms</span><p>Response Time</p></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><span class="stat-num" data-target="2">0</span><span>M+</span><p>Verified</p></div>
+    </div>
+  </div>
+  <div class="hero-scroll-hint"><span>Scroll to explore</span><div class="scroll-arrow"></div></div>
+</section>
+
+
+<!-- MODULE 1: MULTIMODAL RISK -->
+<section id="risk">
+  <div class="section-container">
+    <div class="section-label">Module 01 · Multimodal</div>
+    <h2 class="section-title">Financial Risk <span class="gradient-text">Assessment Engine</span></h2>
+    <p class="section-sub">Signature alone is not enough. TrustTrace fuses visual authenticity with real-world transaction context to compute a holistic fraud probability.</p>
+    <div class="risk-layout">
+      <div class="risk-form-panel">
+        <div class="panel-header">📋 Transaction Metadata Input</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Transfer Amount (₹)</label>
+            <input type="number" id="txAmount" placeholder="e.g. 500000" value="250000"/>
+          </div>
+          <div class="form-group">
+            <label>Account Holder Name</label>
+            <input type="text" id="txName" placeholder="e.g. Jayashree B R" value="Jayashree B R"/>
+          </div>
+          <div class="form-group">
+            <label>Transaction Location</label>
+            <select id="txLocation">
+              <option value="home">Home City (Low Risk)</option>
+              <option value="domestic">Domestic (Medium Risk)</option>
+              <option value="international">International (High Risk)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Account Age</label>
+            <select id="txAge">
+              <option value="old">5+ Years (Trusted)</option>
+              <option value="medium">1–5 Years</option>
+              <option value="new">New Account (&lt;1yr)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Prior Fraud Flags</label>
+            <select id="txFlags">
+              <option value="0">None</option>
+              <option value="1">1 Flag</option>
+              <option value="2">2+ Flags</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Signature CV Score</label>
+            <input type="range" id="txCvScore" min="0" max="100" value="82" oninput="document.getElementById('cvScoreVal').textContent=this.value+'%'"/>
+            <span id="cvScoreVal">82%</span>
+          </div>
+        </div>
+        <button class="btn-primary" id="riskCalcBtn" style="width:100%;margin-top:1rem">🌐 Calculate Risk Score</button>
+      </div>
+      <div class="risk-result-panel" id="riskResult">
+        <div class="risk-idle">
+          <div class="module-icon" style="font-size:3rem">🌐</div>
+          <p>Fill in transaction details and click <strong>Calculate Risk Score</strong></p>
+        </div>
+        <div class="risk-output hidden" id="riskOutput">
+          <div class="fraud-gauge" id="fraudGauge">
+            <svg viewBox="0 0 200 120" width="200">
+              <path d="M20,100 A80,80 0 0,1 180,100" fill="none" stroke="#1a2235" stroke-width="16" stroke-linecap="round"/>
+              <path id="gaugePath" d="M20,100 A80,80 0 0,1 180,100" fill="none" stroke="#3b82f6" stroke-width="16" stroke-linecap="round" stroke-dasharray="251" stroke-dashoffset="251"/>
+            </svg>
+            <div class="gauge-val" id="gaugeVal">0%</div>
+            <div class="gauge-label" id="gaugeLabel">Risk Score</div>
+          </div>
+          <div class="risk-verdict" id="riskVerdict"></div>
+          <div class="risk-factors" id="riskFactors"></div>
+        </div>
+      </div>
+    </div>
+    <div class="how-it-works-row">
+      <div class="hiw-item"><span class="hiw-icon">👁️</span><div><strong>Visual Score</strong><p>CV module returns 0–100 authenticity</p></div></div>
+      <div class="hiw-arrow">→</div>
+      <div class="hiw-item"><span class="hiw-icon">📊</span><div><strong>Metadata Fusion</strong><p>Amount, location, history weighted</p></div></div>
+      <div class="hiw-arrow">→</div>
+      <div class="hiw-item"><span class="hiw-icon">🧮</span><div><strong>Bayesian Fusion</strong><p>Posterior fraud probability calculated</p></div></div>
+      <div class="hiw-arrow">→</div>
+      <div class="hiw-item"><span class="hiw-icon">🚦</span><div><strong>Risk Verdict</strong><p>LOW / MEDIUM / HIGH alert issued</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- MODULE 2: MICRO-TREMOR -->
+<section id="tremor">
+  <div class="section-container">
+    <div class="section-label">Module 02 · Static CV Analysis</div>
+    <h2 class="section-title">Micro-Tremor & <span class="gradient-text">Hesitation Detection</span></h2>
+    <p class="section-sub">Forgers betray themselves with microscopic hesitations and ink tremors. Our CV pipeline finds what the human eye cannot.</p>
+    <div class="tremor-layout">
+      <div class="tremor-canvas-wrap">
+        <div class="panel-header">✏️ Draw a Signature — We Detect Forgery Artifacts</div>
+        <canvas id="tremorCanvas"></canvas>
+        <div class="tremor-controls">
+          <button class="ctrl-btn" id="tremorClear">🗑 Clear</button>
+          <button class="ctrl-btn primary" id="tremorAnalyse" disabled>🔬 Detect Tremors</button>
+        </div>
+      </div>
+      <div class="tremor-results" id="tremorResults">
+        <div class="tremor-idle">
+          <div style="font-size:2.5rem">🔬</div>
+          <p>Draw a signature and click <strong>Detect Tremors</strong></p>
+          <div class="tremor-explainer">
+            <div class="te-item"><span>💧</span><strong>Ink Blotting</strong> — Pen hesitation causes excess ink pooling at inflection points</div>
+            <div class="te-item"><span>〰️</span><strong>Stroke Jitter</strong> — Traced signatures show micro-wobbles in ostensibly straight lines</div>
+            <div class="te-item"><span>⏸️</span><strong>Pen Lifts</strong> — Forgers lift the pen unnaturally between strokes — detectable via gap analysis</div>
+            <div class="te-item"><span>🐢</span><strong>Velocity Drops</strong> — Slow imitation creates non-uniform velocity profiles at curve transitions</div>
+          </div>
+        </div>
+        <div class="tremor-output hidden" id="tremorOutput"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MODULE 3: STYLUS TRACKING -->
+<section id="stylus">
+  <div class="section-container">
+    <div class="section-label">Module 03 · Temporal Analysis</div>
+    <h2 class="section-title">Dynamic Stylus <span class="gradient-text">Biometric Tracking</span></h2>
+    <p class="section-sub">The way you sign — sequence, speed, pressure rhythm — is as unique as a fingerprint. Our LSTM model learns your biometric signing pattern.</p>
+    <div class="stylus-layout">
+      <div class="stylus-pad-wrap">
+        <div class="panel-header">✒️ Sign Here — LSTM Captures Your Biometric Rhythm</div>
+        <canvas id="stylusCanvas"></canvas>
+        <div class="stylus-controls">
+          <button class="ctrl-btn" id="stylusClear">🗑 Clear</button>
+          <button class="ctrl-btn primary" id="stylusAnalyse" disabled>🧠 Analyse Rhythm</button>
+        </div>
+      </div>
+      <div class="stylus-right">
+        <div class="temporal-viz" id="temporalViz">
+          <div class="tv-idle">Sign above to see your biometric timeline</div>
+        </div>
+        <div class="stylus-result" id="stylusResult">
+          <div class="sr-metrics" id="srMetrics">
+            <div class="sr-metric"><div class="srm-label">Stroke Velocity</div><div class="srm-bar-track"><div class="srm-bar" id="smVel" style="width:0%;background:var(--blue)"></div></div></div>
+            <div class="sr-metric"><div class="srm-label">Pressure Rhythm</div><div class="srm-bar-track"><div class="srm-bar" id="smPres" style="width:0%;background:var(--cyan)"></div></div></div>
+            <div class="sr-metric"><div class="srm-label">Sequence Order</div><div class="srm-bar-track"><div class="srm-bar" id="smSeq" style="width:0%;background:var(--green)"></div></div></div>
+            <div class="sr-metric"><div class="srm-label">Lift Timing</div><div class="srm-bar-track"><div class="srm-bar" id="smLift" style="width:0%;background:var(--orange)"></div></div></div>
+          </div>
+          <div class="lstm-verdict hidden" id="lstmVerdict"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MODULE 4: ADAPTIVE LEARNING -->
+<section id="adaptive">
+  <div class="section-container">
+    <div class="section-label">Module 04 · Continual Learning</div>
+    <h2 class="section-title">Few-Shot <span class="gradient-text">Adaptive Learning</span></h2>
+    <p class="section-sub">Signatures change with age and health. TrustTrace monitors natural drift and updates the reference profile — so genuine signatures are never wrongly rejected.</p>
+    <div class="adaptive-layout">
+      <div class="adaptive-left">
+        <div class="panel-header">📚 Reference Profile Manager</div>
+        <div class="profile-slots">
+          <div class="profile-slot" id="slot1">
+            <div class="slot-label">Reference 1 <span class="slot-age">(2020)</span></div>
+            <canvas class="slot-canvas" id="slotCanvas1"></canvas>
+            <button class="slot-btn" id="slotBtn1">+ Register</button>
+          </div>
+          <div class="profile-slot" id="slot2">
+            <div class="slot-label">Reference 2 <span class="slot-age">(2023)</span></div>
+            <canvas class="slot-canvas" id="slotCanvas2"></canvas>
+            <button class="slot-btn" id="slotBtn2">+ Register</button>
+          </div>
+          <div class="profile-slot" id="slot3">
+            <div class="slot-label">Reference 3 <span class="slot-age">(2026)</span></div>
+            <canvas class="slot-canvas" id="slotCanvas3"></canvas>
+            <button class="slot-btn" id="slotBtn3">+ Register</button>
+          </div>
+        </div>
+        <div class="panel-header" style="margin-top:1.25rem">🧪 Test Against Profile</div>
+        <canvas id="adaptiveTestCanvas"></canvas>
+        <div style="display:flex;gap:.75rem;margin-top:.75rem">
+          <button class="ctrl-btn" id="adaptiveClear">🗑 Clear</button>
+          <button class="ctrl-btn primary" id="adaptiveTest" disabled>🧬 Test Signature</button>
+        </div>
+      </div>
+      <div class="adaptive-right">
+        <div class="drift-timeline">
+          <div class="panel-header">📈 Signature Drift Timeline</div>
+          <canvas id="driftChart" height="160"></canvas>
+        </div>
+        <div class="adaptive-result" id="adaptiveResult">
+          <div class="ar-idle">Register at least one reference signature, then test a new one.</div>
+          <div class="ar-output hidden" id="arOutput"></div>
+        </div>
+        <div class="fsl-explainer">
+          <div class="fsl-item"><span>🧠</span><div><strong>Prototypical Network</strong> — Learns a latent "signature centroid" from just 1–3 samples per class.</div></div>
+          <div class="fsl-item"><span>📉</span><div><strong>Drift Compensation</strong> — Elastic Weight Consolidation prevents catastrophic forgetting of old patterns.</div></div>
+          <div class="fsl-item"><span>🔄</span><div><strong>Continual Update</strong> — Each verified genuine signature nudges the centroid — no full retraining needed.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MODULE 5: TELLER DASHBOARD -->
+<section id="teller">
+  <div class="section-container">
+    <div class="section-label">Module 05 · Teller Interface</div>
+    <h2 class="section-title">Real-Time Teller <span class="gradient-text">Verification Dashboard</span></h2>
+    <p class="section-sub">Bank tellers upload a cheque scan and receive an instant verdict, confidence score, and Grad-CAM heatmap showing exactly which stroke areas are suspicious.</p>
+    <div class="teller-layout">
+      <!-- Upload panel -->
+      <div class="teller-left">
+        <div class="teller-upload-zone" id="tellerUpload">
+          <div class="tup-icon">🏦</div>
+          <p>Upload Cheque / Signature Scan</p>
+          <span class="tup-formats">Supports JPG, PNG, PDF scans</span>
+          <input type="file" id="tellerFile" accept="image/*" hidden/>
+          <button class="btn-primary" style="margin-top:1rem" id="tellerUploadBtn">📂 Upload Cheque</button>
+        </div>
+        <div class="teller-preview hidden" id="tellerPreview">
+          <div class="panel-header">📄 Cheque Preview</div>
+          <div class="cheque-mock" id="chequeMock">
+            <div class="cheque-inner">
+              <div class="cheque-row"><span>Pay to:</span><span id="cpPayTo">Jayashree B R</span></div>
+              <div class="cheque-row"><span>Amount:</span><span id="cpAmount">₹ 2,50,000</span></div>
+              <div class="cheque-row"><span>Date:</span><span>18 / 05 / 2026</span></div>
+              <div class="cheque-row"><span>Bank:</span><span>State Bank of India</span></div>
+              <div class="cheque-sig-area">
+                <canvas id="tellerSigCanvas"></canvas>
+                <div class="heatmap-overlay hidden" id="heatmapOverlay"></div>
+                <div class="cheque-sig-label">Authorised Signatory</div>
+              </div>
+            </div>
+          </div>
+          <div class="teller-draw-hint">✏️ Draw the signature in the cheque above</div>
+          <div style="display:flex;gap:.75rem;margin-top:.75rem">
+            <button class="ctrl-btn" id="tellerClear">🗑 Clear</button>
+            <button class="ctrl-btn primary" id="tellerVerify" disabled>🔍 Verify Cheque</button>
+          </div>
+        </div>
+      </div>
+      <!-- Result panel -->
+      <div class="teller-right">
+        <div class="teller-result-panel" id="tellerResultPanel">
+          <div class="teller-idle">
+            <div style="font-size:3rem">🏦</div>
+            <p>Upload a cheque to begin verification</p>
+            <div class="api-badge">
+              <div class="api-dot"></div>
+              <span>API Endpoint: POST /api/v1/verify</span>
+            </div>
+          </div>
+          <div class="teller-output hidden" id="tellerOutput">
+            <div class="teller-verdict-bar" id="tellerVerdictBar">
+              <div class="tvb-icon" id="tvbIcon"></div>
+              <div class="tvb-text">
+                <div class="tvb-main" id="tvbMain"></div>
+                <div class="tvb-sub" id="tvbSub"></div>
+              </div>
+              <div class="tvb-time" id="tvbTime"></div>
+            </div>
+            <div class="teller-conf-row">
+              <div class="tc-item">
+                <div class="tc-label">Signature Match</div>
+                <div class="tc-big" id="tcMatch">--</div>
+              </div>
+              <div class="tc-item">
+                <div class="tc-label">Fraud Probability</div>
+                <div class="tc-big" id="tcFraud">--</div>
+              </div>
+              <div class="tc-item">
+                <div class="tc-label">Risk Level</div>
+                <div class="tc-big" id="tcRisk">--</div>
+              </div>
+            </div>
+            <div class="heatmap-legend">
+              <div class="panel-header">🔥 Grad-CAM Heatmap Active</div>
+              <div class="legend-row">
+                <div class="leg-item"><div class="leg-col" style="background:#ef4444"></div><span>High suspicion</span></div>
+                <div class="leg-item"><div class="leg-col" style="background:#f59e0b"></div><span>Medium</span></div>
+                <div class="leg-item"><div class="leg-col" style="background:#10b981"></div><span>Normal</span></div>
+              </div>
+            </div>
+            <div class="teller-flags" id="tellerFlags"></div>
+            <div class="teller-action-row">
+              <button class="action-btn" id="tellerApprove">✅ Approve</button>
+              <button class="action-btn warn" id="tellerReject">🚫 Reject & Flag</button>
+              <button class="action-btn" id="tellerEscalate">⬆️ Escalate</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo"><span class="logo-icon">⬡</span> TrustTrace</div>
+    <p class="footer-tagline">Computer Vision · LSTM Temporal Analysis · Adaptive Learning · Multimodal Risk Fusion</p>
+    <div class="footer-tech-badges"><span>OpenCV</span><span>PyTorch</span><span>Siamese CNN</span><span>LSTM/GRU</span><span>HOG</span><span>LBP</span><span>Grad-CAM</span><span>FastAPI</span></div>
+    <p class="footer-copy">© 2026 TrustTrace · Fake Signature Detection Using Machine Learning · CSE23602</p>
+  </div>
+</footer>
+
+<div id="toast" class="toast hidden"></div>
+<script src="app.js"></script>
+</body>
+</html>

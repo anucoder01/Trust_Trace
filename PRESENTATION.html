@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrustTrace - Presentation Notes</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f7fa;
+        }
+        h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #2980b9; margin-top: 30px; }
+        .slide { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .slide-title { font-weight: bold; font-size: 1.2em; color: #e74c3c; margin-bottom: 10px; }
+        ul { margin-top: 10px; }
+        li { margin-bottom: 8px; }
+        .highlight { background: #fff3cd; padding: 2px 5px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+    <h1>TrustTrace - Final Presentation Notes</h1>
+    <p><em>Private notes for project demonstration. Do not share publicly.</em></p>
+
+    <div class="slide">
+        <div class="slide-title">Slide 1: Introduction & The Problem</div>
+        <ul>
+            <li><strong>Hook:</strong> Start with the financial cost of signature forgery (billions lost annually globally).</li>
+            <li><strong>Problem:</strong> Traditional static verification is easily fooled by skilled forgers. Tellers rely on human eye, which cannot detect micro-hesitations or temporal biometric data.</li>
+            <li><strong>Solution:</strong> TrustTrace. A 5-module AI intelligence platform combining Computer Vision, Temporal Analysis, and Risk Context.</li>
+        </ul>
+    </div>
+
+    <div class="slide">
+        <div class="slide-title">Slide 2: System Architecture Overview</div>
+        <ul>
+            <li>Briefly explain the 5 modules. Emphasize that it's a <em>layered</em> defense.</li>
+            <li><strong>Key Tech Stack to mention:</strong> OpenCV for static analysis, PyTorch/LSTMs for temporal, Scikit-Learn (SVM) for classical CV baseline, and HTML/JS/CSS for the interactive frontend.</li>
+            <li><strong>Dataset:</strong> Mention we use the standard <span class="highlight">CEDAR or Robinreni Kaggle dataset</span> (Genuine vs Forged) for baseline CV training.</li>
+        </ul>
+    </div>
+
+    <div class="slide">
+        <div class="slide-title">Slide 3: Module 1 & 2 - Static Analysis (CV)</div>
+        <ul>
+            <li><strong>Demo Action:</strong> Show the "Micro-Tremor" drawing pad.</li>
+            <li><strong>Talking Points:</strong> Explain that HOG (Histogram of Oriented Gradients) captures the structure of the signature. SVM classifies it.</li>
+            <li>Mention "Micro-tremors": Forgers hesitate. The pen stops, causing ink blotting. The lines jitter. The CV pipeline detects this deviation from a smooth ballistic curve.</li>
+        </ul>
+    </div>
+
+    <div class="slide">
+        <div class="slide-title">Slide 4: Module 3 - Dynamic Stylus Tracking</div>
+        <ul>
+            <li><strong>Demo Action:</strong> Sign on the "Stylus Track" pad.</li>
+            <li><strong>Talking Points:</strong> This is the game-changer. We don't just look at the final image; we look at <em>how</em> it was drawn.</li>
+            <li>Velocity, Pressure, Sequence, Lift Timing. An LSTM (Long Short-Term Memory network) learns this unique "biometric rhythm". It's near impossible to fake both the image <em>and</em> the speed/rhythm perfectly.</li>
+        </ul>
+    </div>
+
+    <div class="slide">
+        <div class="slide-title">Slide 5: Module 4 & 5 - Adaptive Learning & Teller View</div>
+        <ul>
+            <li><strong>Adaptive Learning:</strong> Explain "Concept Drift". People's signatures change as they age or get injured. Our system updates the baseline centroid so we don't start rejecting genuine signatures (reducing false positives).</li>
+            <li><strong>Teller Dashboard:</strong> Walk through the final real-world use case. Upload a cheque, get the result.</li>
+            <li><strong>Demo Action:</strong> Click the "Verify Cheque" button and show the Grad-CAM heatmap. Explain that the heatmap provides <em>explainability</em> to the teller (showing exactly *where* the forgery is suspected).</li>
+        </ul>
+    </div>
+
+    <div class="slide">
+        <div class="slide-title">Q&A Prep - Expected Questions</div>
+        <ul>
+            <li><strong>Q: What happens if the system is down?</strong> A: We have the classical SVM model as a lightweight fallback that can run locally.</li>
+            <li><strong>Q: How do you handle different pen types/colors?</strong> A: Pre-processing (grayscaling, thresholding, L2-Hys normalization in HOG) makes the model invariant to ink color and minor thickness variations.</li>
+            <li><strong>Q: What is the accuracy?</strong> A: Base CV model achieves ~90-95% on standard datasets. With temporal data fused, we aim for >99%.</li>
+        </ul>
+    </div>
+
+</body>
+</html>
