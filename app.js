@@ -530,68 +530,90 @@ document.addEventListener('DOMContentLoaded', () => {
         const output = document.getElementById('tellerOutput');
         output.classList.add('hidden');
         
-        // Generate a random result for the demo
-        const isFraud = Math.random() > 0.5;
-        
-        await delay(2000); // Simulate API call
-        
-        const matchScore = isFraud ? Math.floor(Math.random() * 30) + 10 : Math.floor(Math.random() * 15) + 85;
-        const fraudProb = isFraud ? Math.floor(Math.random() * 20) + 80 : Math.floor(Math.random() * 10) + 1;
-        
-        document.getElementById('tcMatch').textContent = `${matchScore}%`;
-        document.getElementById('tcMatch').style.color = isFraud ? 'var(--accent-red)' : 'var(--accent-green)';
-        
-        document.getElementById('tcFraud').textContent = `${fraudProb}%`;
-        document.getElementById('tcFraud').style.color = isFraud ? 'var(--accent-red)' : 'var(--accent-green)';
-        
-        document.getElementById('tcRisk').textContent = isFraud ? 'HIGH' : 'LOW';
-        document.getElementById('tcRisk').style.color = isFraud ? 'var(--accent-red)' : 'var(--accent-green)';
-        
-        const tvbIcon = document.getElementById('tvbIcon');
-        const tvbMain = document.getElementById('tvbMain');
-        const tvbSub = document.getElementById('tvbSub');
-        const tvbTime = document.getElementById('tvbTime');
-        const bar = document.getElementById('tellerVerdictBar');
-        
-        if(isFraud) {
-            tvbIcon.textContent = '🚫';
-            tvbMain.textContent = 'Signature Forgery Detected';
-            tvbMain.style.color = 'var(--accent-red)';
-            tvbSub.textContent = 'High confidence of structural imitation.';
-            bar.style.borderColor = 'var(--accent-red)';
-            bar.style.background = 'rgba(239, 68, 68, 0.05)';
+        try {
+            // Get the signature image as a Blob
+            const blob = await new Promise(resolve => tellerPad.canvas.toBlob(resolve, 'image/png'));
             
-            // Add fake heatmap
-            const overlay = document.getElementById('heatmapOverlay');
-            overlay.classList.remove('hidden');
-            // A generic radial gradient simulating Grad-CAM focusing on the center
-            overlay.style.backgroundImage = 'radial-gradient(circle at 50% 50%, rgba(239, 68, 68, 0.8) 0%, rgba(245, 158, 11, 0.5) 40%, transparent 70%)';
+            const formData = new FormData();
+            formData.append('file', blob, 'signature.png');
             
-            document.getElementById('tellerFlags').innerHTML = `
-                <div style="font-size:0.85rem; padding:1rem; background:var(--bg-color); border-radius:8px; margin-bottom:1rem;">
-                    <strong>Alerts:</strong><br/>
-                    • Stroke velocity profile is non-ballistic.<br/>
-                    • Abnormal curvature detected at inflection points.<br/>
-                    • Heatmap highlights region of highest divergence from profile.
-                </div>
-            `;
-        } else {
-            tvbIcon.textContent = '✅';
-            tvbMain.textContent = 'Signature Verified';
-            tvbMain.style.color = 'var(--accent-green)';
-            tvbSub.textContent = 'Matches reference profile perfectly.';
-            bar.style.borderColor = 'var(--accent-green)';
-            bar.style.background = 'rgba(16, 185, 129, 0.05)';
+            const startTime = performance.now();
+            const response = await fetch('http://localhost:8000/api/v1/verify', {
+                method: 'POST',
+                body: formData
+            });
             
-            document.getElementById('heatmapOverlay').classList.add('hidden');
-            document.getElementById('tellerFlags').innerHTML = '';
+            const data = await response.json();
+            const endTime = performance.now();
+            const processTime = Math.round(endTime - startTime);
+            
+            if (data.status === 'success') {
+                const isFraud = data.verdict === 'Suspicious';
+                const confidence = data.confidence_score;
+                
+                document.getElementById('tcMatch').textContent = isFraud ? `${(100 - confidence).toFixed(1)}%` : `${confidence.toFixed(1)}%`;
+                document.getElementById('tcMatch').style.color = isFraud ? 'var(--accent-red)' : 'var(--accent-green)';
+                
+                document.getElementById('tcFraud').textContent = isFraud ? `${confidence.toFixed(1)}%` : `${(100 - confidence).toFixed(1)}%`;
+                document.getElementById('tcFraud').style.color = isFraud ? 'var(--accent-red)' : 'var(--accent-green)';
+                
+                document.getElementById('tcRisk').textContent = isFraud ? 'HIGH' : 'LOW';
+                document.getElementById('tcRisk').style.color = isFraud ? 'var(--accent-red)' : 'var(--accent-green)';
+                
+                const tvbIcon = document.getElementById('tvbIcon');
+                const tvbMain = document.getElementById('tvbMain');
+                const tvbSub = document.getElementById('tvbSub');
+                const tvbTime = document.getElementById('tvbTime');
+                const bar = document.getElementById('tellerVerdictBar');
+                
+                if (isFraud) {
+                    tvbIcon.textContent = '🚫';
+                    tvbMain.textContent = 'Signature Forgery Detected';
+                    tvbMain.style.color = 'var(--accent-red)';
+                    tvbSub.textContent = `High confidence (${confidence}%) of structural imitation.`;
+                    bar.style.borderColor = 'var(--accent-red)';
+                    bar.style.background = 'rgba(239, 68, 68, 0.05)';
+                } else {
+                    tvbIcon.textContent = '✅';
+                    tvbMain.textContent = 'Signature Verified';
+                    tvbMain.style.color = 'var(--accent-green)';
+                    tvbSub.textContent = `Matches reference profile perfectly (${confidence}%).`;
+                    bar.style.borderColor = 'var(--accent-green)';
+                    bar.style.background = 'rgba(16, 185, 129, 0.05)';
+                }
+                
+                // Always show real heatmap from backend
+                const overlay = document.getElementById('heatmapOverlay');
+                overlay.classList.remove('hidden');
+                overlay.style.backgroundImage = `url('${data.heatmap_image_base64}')`;
+                overlay.style.backgroundSize = 'cover';
+                overlay.style.backgroundPosition = 'center';
+                overlay.style.mixBlendMode = 'multiply';
+                
+                document.getElementById('tellerFlags').innerHTML = `
+                    <div style="font-size:0.85rem; padding:1rem; background:var(--bg-color); border-radius:8px; margin-bottom:1rem;">
+                        <strong>ML & Tremor Alerts:</strong><br/>
+                        • Edge Jitter Ratio: ${data.tremor_analysis.edge_jitter_ratio}<br/>
+                        • Ink Blot Ratio: ${data.tremor_analysis.ink_blot_ratio}<br/>
+                        • Tremor Risk Score: ${data.tremor_analysis.tremor_risk_score}<br/>
+                        • Heatmap highlights region of highest divergence.
+                    </div>
+                `;
+                
+                tvbTime.innerHTML = `Process Time:<br/><strong>${processTime}ms</strong>`;
+                output.classList.remove('hidden');
+            } else {
+                showToast('API Error: ' + data.message, true);
+                idle.classList.remove('hidden');
+            }
+        } catch (error) {
+            console.error('API Error:', error);
+            showToast('Failed to connect to backend ML service.', true);
+            idle.classList.remove('hidden');
+        } finally {
+            btn.innerHTML = '🔍 Verify Cheque';
+            btn.disabled = false;
         }
-        
-        tvbTime.innerHTML = `Process Time:<br/><strong>142ms</strong>`;
-        
-        output.classList.remove('hidden');
-        btn.innerHTML = '🔍 Verify Cheque';
-        btn.disabled = false;
     });
 
     // Teller actions
@@ -602,6 +624,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.getElementById('tellerReject')?.addEventListener('click', () => {
         showToast('Transaction Rejected and Flagged for Review.', true);
+        document.getElementById('tellerClear').click();
+    });
+
+    document.getElementById('tellerEscalate')?.addEventListener('click', () => {
+        showToast('Transaction Escalated to Senior Manager for Manual Review.', true);
         document.getElementById('tellerClear').click();
     });
 
