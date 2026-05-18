@@ -3,6 +3,9 @@ import cv2
 import numpy as np
 from skimage.feature import hog
 from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, VotingClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report
 import joblib
@@ -69,9 +72,26 @@ def train_model(data_dir, model_save_path):
     # Split data
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     
-    # Initialize and train SVM classifier
-    print("Training SVM classifier...")
-    clf = SVC(kernel='rbf', probability=True, C=10, gamma='scale')
+    # Initialize and train Ensemble Classifier
+    print("Training Ensemble Classifier (SVM, RF, GradientBoosting, LogisticRegression, KNN)...")
+    
+    svm_clf = SVC(kernel='rbf', probability=True, C=10, gamma='scale')
+    rf_clf = RandomForestClassifier(n_estimators=100, random_state=42)
+    gb_clf = GradientBoostingClassifier(n_estimators=50, random_state=42)
+    lr_clf = LogisticRegression(max_iter=1000, random_state=42)
+    knn_clf = KNeighborsClassifier(n_neighbors=3)
+    
+    clf = VotingClassifier(
+        estimators=[
+            ('svm', svm_clf),
+            ('rf', rf_clf),
+            ('gb', gb_clf),
+            ('lr', lr_clf),
+            ('knn', knn_clf)
+        ],
+        voting='soft'
+    )
+    
     clf.fit(X_train, y_train)
     
     # Evaluate model

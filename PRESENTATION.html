@@ -26,9 +26,9 @@
     <div class="slide">
         <div class="slide-title">1. Technical Details & Machine Learning Algorithms</div>
         
-        <h3>Support Vector Machine (SVM)</h3>
-        <p><strong>What it is:</strong> SVM is a supervised machine learning algorithm used for classification. It works by finding a "hyperplane" (a mathematical boundary) that best separates our two classes: Genuine and Forged.</p>
-        <p><strong>Where & Why:</strong> Used in `train.py` and `main.py` as our core decision engine. We chose an SVM with a Radial Basis Function (RBF) kernel because it is highly effective in high-dimensional spaces (like image features) and is much faster to train and run locally compared to deep neural networks.</p>
+        <h3>Soft-Voting Ensemble Model (SVM, Random Forest, XGBoost/GB, LR, KNN)</h3>
+        <p><strong>What it is:</strong> Instead of relying on a single algorithm, TrustTrace now uses a powerful "Soft-Voting" Ensemble Classifier. It combines 5 different machine learning algorithms: Support Vector Machine (SVM), Random Forest, Gradient Boosting (XGBoost logic), Logistic Regression, and K-Nearest Neighbors (KNN).</p>
+        <p><strong>Where & Why:</strong> Used in `train.py` and `main.py` as our core decision engine. A single algorithm might have biases (e.g., SVM is great for high dimensions, Random Forest handles non-linear splits well). By ensembling them together, each algorithm "votes" on the probability of forgery, and the system averages their confidence scores for a vastly more robust and accurate prediction!</p>
 
         <h3>Histogram of Oriented Gradients (HOG)</h3>
         <p><strong>What it is:</strong> A feature descriptor used in computer vision. Instead of looking at raw pixels, HOG looks at the *direction* and *intensity* of edges (gradients) in an image.</p>
@@ -78,8 +78,8 @@
         <div class="faq-q">1. What is TrustTrace?</div>
         <div class="faq-a">TrustTrace is an AI-powered banking-grade platform designed to detect signature forgery using Computer Vision, Machine Learning, and Micro-Tremor analysis.</div>
 
-        <div class="faq-q">2. Why use SVM instead of Deep Learning?</div>
-        <div class="faq-a">SVM is computationally lightweight, requires less training data to reach high accuracy, and is faster for real-time inference on standard banking computers without GPUs.</div>
+        <div class="faq-q">2. Why use an Ensemble instead of Deep Learning?</div>
+        <div class="faq-a">Deep learning (CNNs) requires expensive GPUs and massive datasets. By using a Soft-Voting Ensemble (SVM, Random Forest, Gradient Boosting, Logistic Regression, and KNN), we get extremely robust accuracy by averaging 5 distinct algorithms, while still keeping inference time under a few milliseconds locally.</div>
 
         <div class="faq-q">3. What is HOG (Histogram of Oriented Gradients)?</div>
         <div class="faq-a">It's a feature extraction technique that counts occurrences of gradient orientation in localized portions of an image. It helps the model focus on the shape of the signature rather than lighting or color.</div>
