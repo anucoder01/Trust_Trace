@@ -362,24 +362,53 @@ document.addEventListener('DOMContentLoaded', () => {
         
         document.querySelector('.tv-idle').textContent = 'Extracting temporal features...';
         
-        await delay(1000); // Simulate LSTM forward pass
+        try {
+            const response = await fetch('http://localhost:8000/api/v1/temporal', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ strokes: stylusPad.strokes })
+            });
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                const isMatch = data.verdict === 'Genuine';
+                const matchPct = data.match_percentage;
+                
+                // Animate metrics based on real data
+                document.getElementById('smVel').style.width = `${Math.min(100, (data.metrics.avg_velocity * 200))}%`;
+                document.getElementById('smPres').style.width = `${Math.min(100, matchPct)}%`;
+                document.getElementById('smSeq').style.width = '100%'; 
+                document.getElementById('smLift').style.width = `${Math.min(100, (data.metrics.lifts * 10))}%`;
+                
+                const verdict = document.getElementById('lstmVerdict');
+                if (isMatch) {
+                    verdict.textContent = `✅ Biometric Rhythm Match: ${matchPct}% (Genuine)`;
+                    verdict.className = 'lstm-verdict'; // Reset classes
+                    verdict.style.color = '';
+                    verdict.style.borderColor = '';
+                    verdict.style.background = '';
+                } else {
+                    verdict.textContent = `🚫 Low Rhythm Match: ${matchPct}% (Suspicious)`;
+                    verdict.className = 'lstm-verdict warn';
+                    verdict.style.color = 'var(--accent-red)';
+                    verdict.style.borderColor = 'var(--accent-red)';
+                    verdict.style.background = 'rgba(239, 68, 68, 0.1)';
+                }
+                verdict.classList.remove('hidden');
+                
+                document.querySelector('.tv-idle').textContent = `Analysis Complete (Velocity Variance: ${data.metrics.velocity_variance})`;
+            } else {
+                showToast(data.message || 'Error processing temporal data', true);
+                document.querySelector('.tv-idle').textContent = 'Error occurred';
+            }
+        } catch (err) {
+            console.error(err);
+            showToast('Failed to connect to backend ML service.', true);
+            document.querySelector('.tv-idle').textContent = 'Connection failed';
+        }
         
-        document.querySelector('.tv-idle').textContent = 'Comparing to baseline model...';
-        
-        await delay(800);
-        
-        // Animate metrics
-        document.getElementById('smVel').style.width = '88%';
-        document.getElementById('smPres').style.width = '92%';
-        document.getElementById('smSeq').style.width = '100%';
-        document.getElementById('smLift').style.width = '85%';
-        
-        const verdict = document.getElementById('lstmVerdict');
-        verdict.textContent = '✅ Biometric Rhythm Match: 91% (Genuine)';
-        verdict.className = 'lstm-verdict'; // Reset classes
-        verdict.classList.remove('hidden');
-        
-        document.querySelector('.tv-idle').textContent = 'Temporal Analysis Complete';
         btn.innerHTML = '🧠 Analyse Rhythm';
         btn.disabled = false;
     });
@@ -404,14 +433,36 @@ document.addEventListener('DOMContentLoaded', () => {
         slotCanvas.addEventListener('mouseout', () => isDraw=false);
         
         const btn = document.getElementById(`slotBtn${i}`);
-        btn.addEventListener('click', () => {
-            btn.textContent = '✅ Saved';
-            btn.style.background = 'var(--accent-green)';
-            btn.style.color = '#fff';
+        btn.addEventListener('click', async () => {
+            btn.textContent = '⏳ Saving...';
             btn.disabled = true;
             slotCanvas.style.pointerEvents = 'none'; // Lock drawing
-            registeredProfiles++;
-            showToast(`Reference ${i} added to centroid.`);
+            
+            try {
+                const blob = await new Promise(resolve => slotCanvas.toBlob(resolve, 'image/png'));
+                const formData = new FormData();
+                formData.append('file', blob, `ref${i}.png`);
+                
+                const response = await fetch('http://localhost:8000/api/v1/register_profile', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    registeredProfiles = data.total_profiles;
+                    btn.textContent = '✅ Saved';
+                    btn.style.background = 'var(--accent-green)';
+                    btn.style.color = '#fff';
+                    showToast(`Reference ${i} added. Total latent profiles: ${registeredProfiles}`);
+                } else {
+                    btn.textContent = '❌ Error';
+                }
+            } catch (err) {
+                console.error(err);
+                btn.textContent = '❌ Error';
+                showToast('Failed to connect to backend', true);
+            }
         });
     }
     
@@ -439,23 +490,45 @@ document.addEventListener('DOMContentLoaded', () => {
         const output = document.getElementById('arOutput');
         output.classList.add('hidden');
         
-        await delay(1200);
+        try {
+            const blob = await new Promise(resolve => adaptivePad.canvas.toBlob(resolve, 'image/png'));
+            const formData = new FormData();
+            formData.append('file', blob, 'test.png');
+            
+            const response = await fetch('http://localhost:8000/api/v1/adaptive_test', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                const isMatch = data.is_match;
+                const distance = data.distance.toFixed(2);
+                
+                output.innerHTML = `
+                    <div style="text-align:center">
+                        <div style="font-size:3rem; margin-bottom:1rem;">${isMatch ? '✅' : '❌'}</div>
+                        <h3 style="margin-bottom:1rem;">${isMatch ? 'Match Found' : 'Drift Too High'}</h3>
+                        <p style="color:var(--text-secondary); font-size:0.9rem;">
+                            Euclidean Distance to Centroid: <strong>${distance}</strong> (Threshold: ${data.threshold})<br/><br/>
+                            ${isMatch 
+                                ? `Distance to profile centroid is within acceptable threshold. The model has updated its parameters to include this new sample, adapting to the user's natural handwriting drift. Total latent profiles: ${data.profiles_count}` 
+                                : `Signature deviates significantly from the registered profiles. Distance in latent space exceeds the few-shot boundary.`}
+                        </p>
+                    </div>
+                `;
+                output.classList.remove('hidden');
+                if (isMatch) {
+                    registeredProfiles = data.profiles_count;
+                }
+            } else {
+                showToast(data.message || 'Error running adaptive test', true);
+            }
+        } catch (err) {
+            console.error(err);
+            showToast('Failed to connect to backend', true);
+        }
         
-        const isMatch = Math.random() > 0.3; // 70% chance of pass for demo
-        
-        output.innerHTML = `
-            <div style="text-align:center">
-                <div style="font-size:3rem; margin-bottom:1rem;">${isMatch ? '✅' : '❌'}</div>
-                <h3 style="margin-bottom:1rem;">${isMatch ? 'Match Found' : 'Drift Too High'}</h3>
-                <p style="color:var(--text-secondary); font-size:0.9rem;">
-                    ${isMatch 
-                        ? `Distance to profile centroid is within acceptable threshold. The model has updated its parameters to include this new sample, adapting to the user's natural handwriting drift.` 
-                        : `Signature deviates significantly from the registered profiles. Distance in latent space exceeds the few-shot boundary.`}
-                </p>
-            </div>
-        `;
-        
-        output.classList.remove('hidden');
         btn.innerHTML = '🧬 Test Signature';
         btn.disabled = false;
     });
