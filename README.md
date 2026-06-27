@@ -1,21 +1,78 @@
 # TrustTrace
 
-TrustTrace is a banking-grade signature detection and verification application. It uses a Machine Learning pipeline with HOG-based feature extraction and SVM classification to analyze and verify signatures.
+**Banking-Grade Signature Detection and Verification Using Machine Learning and Computer Vision**
 
-## Features
-- Interactive Web Interface
-- Real-time Signature Analysis
-- Machine Learning Backend
+TrustTrace is a state-of-the-art, multi-layered signature verification platform designed to secure financial ecosystems against advanced document forgery. Unlike traditional static template-matching systems, TrustTrace utilizes a dual-layered verification architecture combining robust static shape analysis, microscopic CV tremor inspection, and dynamic biometric tracking.
 
-## Structure
-- Frontend: HTML, CSS (style.css), JS (app.js)
-- Backend/ML: Python pipeline in `ml_pipeline/`
+## Overview
+The financial and banking sectors rely heavily on signatures for high-value transactions. Manual verification is prone to fatigue and subjective bias, while standard machine learning models struggle to detect skilled tracings. 
 
-## Setup
-To run the ML pipeline:
+TrustTrace bridges these gaps by analyzing both the geometric structure of a signature and the physical mechanics of handwriting (such as micro-tremors, stroke continuity, ink pooling, and drawing velocity). Built with a high-performance **FastAPI** backend and an interactive **Three.js**-powered frontend dashboard, it provides real-time verdicts, Explainable AI heatmaps, and comprehensive transaction risk scores.
+
+---
+
+## Key Features
+
+1. **Dual-Layered Verification**
+   - **Static Analysis:** Extracts Histogram of Oriented Gradients (HOG) features from scanned images.
+   - **Dynamic Tracking:** LSTM/GRU temporal models analyze stroke coordinates, lifts, and speed variation for digital entries.
+
+2. **Soft-Voting Ensemble Model**
+   - Employs five classifiers: Support Vector Machine (SVM), Random Forest, Gradient Boosting, Logistic Regression, and K-Nearest Neighbors (KNN). This ensemble approach yields highly accurate spatial match verdicts.
+
+3. **OpenCV Micro-Tremor Engine**
+   - Calculates **Edge Jitter Ratio** to detect hand tremors typical of slow tracing.
+   - Computes **Ink Blot Ratio** to identify hesitation pauses through localized pools of thick ink.
+
+4. **Prototypical Adaptive Learning (Few-Shot)**
+   - Monitors natural signature drift over time. It continuously updates the user's profile centroid in the latent space, avoiding the need for complete model retraining.
+
+5. **Explainable AI (XAI) Heatmaps**
+   - Generates pseudo Grad-CAM heatmaps highlighting abnormal stroke densities and anomalies, providing visual evidence to tellers.
+
+6. **Multimodal Financial Risk Engine**
+   - Fuses visual authenticity scores with contextual transaction metadata (amount, location, flags, account history) using a Bayesian weighting process to compute a final risk index.
+
+7. **Interactive Dashboard**
+   - Real-time HTML5 canvas pads, 3D particle animations, and detailed verification analytics in the teller UI.
+
+---
+
+## The TrustTrace Advantage (Pros)
+
+- **Comprehensive Security:** Defends against both casual forgeries (via shape analysis) and skilled traced forgeries (via tremor and rhythm analysis).
+- **Adaptable & Future-Proof:** Automatically adjusts to changes in a user's handwriting over time without skyrocketing False Rejection Rates (FRR).
+- **Transparent Decisions:** Does not act as a "black box." Visual heatmaps explain precisely *why* a signature is flagged.
+- **Context-Aware:** Evaluates the risk of the transaction holistically rather than just looking at the signature in isolation.
+- **Accessible Deployment:** Engineered to run efficiently without requiring heavy, expensive GPU infrastructure at every bank teller's desk.
+
+---
+
+## How It Outperforms Existing Systems
+
+| Feature / Capability | Traditional Systems | Deep CNN Models | TrustTrace |
+|----------------------|----------------------|-----------------|------------|
+| **Traced Forgery Detection** | Poor (Foiled by overlays) | Moderate | **Excellent** (Micro-tremor CV) |
+| **Explanation of Results** | None (Binary verdict) | Black-Box | **High** (Visual Heatmaps) |
+| **Signature Drift Handling** | Static (High false rejects) | Requires Retraining | **Dynamic** (Adaptive Latent Centroids) |
+| **Context Integration** | Isolated | Isolated | **Integrated** (Bayesian Risk Engine) |
+| **Hardware Requirements** | Low | High (Dedicated GPUs) | **Optimized** (Runs locally via FastAPI) |
+
+---
+
+## Project Structure
+
+- **Frontend:** HTML, CSS (`style.css`), JS (`app.js`) - Contains the Teller Dashboard and interactive elements.
+- **Backend/ML:** Python pipeline in `ml_pipeline/` - Includes the FastAPI service, Computer Vision core, and Machine Learning models.
+- **Documentation:** VTU Project Reports (`TRUSTTRACE_REPORT.*`) detailing the methodology, architecture, and results.
+
+## Setup & Execution
+
+### Backend (ML Pipeline)
 1. Navigate to the `ml_pipeline` directory.
-2. Install dependencies.
-3. Run the train script.
+2. Install the required dependencies: `pip install -r requirements.txt` (or install FastAPI, OpenCV, Scikit-Learn, Pandas, Uvicorn, etc. manually).
+3. Start the FastAPI server (e.g., using `uvicorn main:app --reload`).
 
-To view the frontend:
-1. Open `index.html` in your browser.
+### Frontend
+1. Simply open `index.html` in your modern web browser.
+2. Ensure the backend server is running and accessible by the frontend application for real-time verification to work.
