@@ -68,11 +68,59 @@ TrustTrace bridges these gaps by analyzing both the geometric structure of a sig
 
 ## Setup & Execution
 
-### Backend (ML Pipeline)
-1. Navigate to the `ml_pipeline` directory.
-2. Install the required dependencies: `pip install -r requirements.txt` (or install FastAPI, OpenCV, Scikit-Learn, Pandas, Uvicorn, etc. manually).
-3. Start the FastAPI server (e.g., using `uvicorn main:app --reload`).
+### Prerequisites
+- Python 3.8+
+- A modern web browser
 
-### Frontend
-1. Simply open `index.html` in your modern web browser.
-2. Ensure the backend server is running and accessible by the frontend application for real-time verification to work.
+### Backend (ML Pipeline)
+
+1. **Navigate to the `ml_pipeline` directory:**
+   ```bash
+   cd ml_pipeline
+   ```
+
+2. **(Optional) Create and activate a virtual environment:**
+   ```bash
+   # Windows
+   python -m venv venv
+   .\venv\Scripts\activate
+   
+   # Linux/Mac
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
+
+3. **Install the required dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **(Optional) Generate Data & Train the Model:**
+   *Note: A pre-trained `signature_svm_model.pkl` is already included. You only need to run these if you wish to train the model from scratch.*
+   ```bash
+   python generate_dummy_data.py
+   python train.py
+   ```
+
+5. **Start the FastAPI server:**
+   ```bash
+   uvicorn main:app --reload
+   ```
+   The backend API will now be running at `http://127.0.0.1:8000`.
+
+### Frontend (Dashboard)
+
+The frontend is built with plain HTML, CSS, and JS. It requires no complex build tools.
+
+1. **Open the Application:**
+   Simply double-click `index.html` in the root directory of the project to open it in your web browser.
+   
+   *Alternatively, you can serve it via a simple local server:*
+   ```bash
+   # In the root directory (where index.html is located)
+   python -m http.server 3000
+   ```
+   Then navigate to `http://localhost:3000` in your browser.
+
+2. **Usage:**
+   Ensure the FastAPI backend is running simultaneously so the dashboard can communicate with the ML pipeline to verify signatures.
